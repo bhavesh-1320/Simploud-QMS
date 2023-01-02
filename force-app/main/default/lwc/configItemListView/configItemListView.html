@@ -1,0 +1,164 @@
+<template>
+    <lightning-card >
+
+        <div slot="title">
+            <lightning-icon slot="actions" icon-name="custom:custom67" ></lightning-icon>
+            &nbsp;All Configuration Items
+        </div>
+
+        <lightning-button label="New" slot="actions" onclick={createNew}></lightning-button>
+
+        <div style="margin: 15px;">
+            <lightning-input type="search" label="Search on the basis of Type and Status" onchange={handleSearch}>
+            </lightning-input>
+        </div>
+        
+        <div style="width: auto;">
+            <template if:true={data}>
+                <lightning-datatable data={data}
+                                     columns={columns}
+                                     key-field="id"
+                                     data-id="table"
+                                     sorted-by={sortBy}
+                                     sorted-direction={sortDirection}
+                                     onsort={doSorting}
+                                     hide-checkbox-column="true"
+                                     show-row-number-column="true"
+                                     onrowaction={handleRowAction}>
+                </lightning-datatable>
+
+                </br>
+
+                <!-- <lightning-layout horizontal-align="space">
+                    <lightning-layout-item flexibility="auto">
+                        <lightning-button 
+                            label="Previous" 
+                            icon-name="utility:chevronleft" 
+                            onclick={previousHandler}>
+                        </lightning-button>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item flexibility="auto">
+                        Page {page} of {totalPage}
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item flexibility="auto">
+                        <lightning-button 
+                            label="Next" 
+                            icon-name="utility:chevronright" 
+                            icon-position="right"
+                            onclick={nextHandler}>
+                        </lightning-button>
+                    </lightning-layout-item>
+                </lightning-layout> -->
+            </template>
+        </div>
+    </lightning-card>
+
+    <template if:true={isModalOpen}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close"
+                            alternative-text="close"
+                            variant="inverse"
+                            size="small" ></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Assign Internal Ownership</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <div style="background-color: white; padding: 15px;">
+                    <div class="slds-form-element">
+                        <div class="slds-form-element__control">
+                            <div class="slds-combobox_container">
+                                <div id="box" class={boxClass} aria-expanded="true" aria-haspopup="listbox" role="combobox">
+                                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+
+                                        <template if:true={isValueSelected}>
+                                            <div id="lookup-pill" class="slds-pill-container">
+                                                <div class="slds-grid slds-gutters">
+                                                    <div class="slds-col slds-size_1-of-3" style="text-align: center; padding-top: 5px;">
+                                                        <span>Current Owner:</span>
+                                                    </div>
+
+                                                    <div class="slds-col slds-size_2-of-3">
+                                                        <div style="border: 0.5px solid lightgray; border-radius: 5px; padding: 2px;">
+                                                            <span class="slds-pill slds-pill_link" style="width: 100%">
+                                                                <span class="slds-pill__icon_container">
+                                                                    <span class="slds-icon_container slds-icon-standard-account" title="Account">
+                                                                        <lightning-icon icon-name={iconName} alternative-text="acc" ></lightning-icon>
+                                                                    <span class="slds-assistive-text">User</span>
+                                                                    </span>
+                                                                </span>
+                                                                <a href={href} class="slds-pill__action" title="Full pill label verbiage mirrored here" style="color:inherit; text-decoration:none; pointer-events:none;">
+                                                                    <span class="slds-pill__label">{selectedName}</span>
+                                                                </a>
+                                                                <button class="slds-button slds-button_icon slds-button_icon slds-pill__remove" title="Remove" onclick={handleRemovePill}>
+                                                                    <lightning-icon icon-name="utility:close" alternative-text="acc" ></lightning-icon>
+                                                                    <span class="slds-assistive-text">Remove</span>
+                                                                </button>
+                                                            </span>
+                                                            <!-- <lightning-pill class="pillSize" label={selectedName} name={selectedName} onremove={handleRemovePill} href={href}>
+                                                                <lightning-icon icon-name={iconName} alternative-text="acc" ></lightning-icon>
+                                                            </lightning-pill> -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template if:false={isValueSelected}>
+                                            <div class="slds-p-top_none">
+                                                <div class="slds-grid slds-gutters">
+                                                    <div class="slds-col slds-size_1-of-3" style="text-align: center; padding-top: 5px;">
+                                                        <span>Select User:</span>
+                                                    </div>
+
+                                                    <div class="slds-col slds-size_2-of-3">
+                                                        <lightning-input class={inputClass} type="search" id="input" value={searchTerm}
+                                                                        onclick={handleClick} onblur={onBlur} onchange={onChange}
+                                                                        variant="label-hidden" autocomplete="off" placeholder={searchPlaceholder}>
+                                                        </lightning-input>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template if:true={noOwnerSelectedFlag}>
+                                            <br/>
+                                            <div style="color: rgb(255, 0, 0); text-align: center;">
+                                                <b>*</b>Please select a user.
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7" role="listbox" style="left: 67%; width: 65%;">
+                                        <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                            <template for:each={records} for:item="record">
+                                                <li key={record.Id} onclick={onSelect} data-id={record.Id} role="presentation" data-name={record.Name}>
+                                                    <span class="" role="option">
+                                                        <lightning-icon class="slds-icon slds-icon--small slds-icon-text-default" icon-name={iconName} alternative-text={objName} size="small"></lightning-icon>
+                                                        <span class="slds-truncate">{record.Name}</span>
+                                                    </span>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={changeInternalOwner} title="OK">OK</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

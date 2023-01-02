@@ -1,0 +1,1297 @@
+<template>
+    <template if:true={showFullScreenSpinner}>
+            <lightning-spinner class="slds-is-fixed" alternative-text="Loading" size="large"></lightning-spinner>
+    </template>
+
+    <template if:true={showConfigSpin}>
+
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <!-- modal header start -->
+            <header class="slds-modal__header">
+                <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">Status</h2>
+            </header>
+        
+            <!-- modal body start -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+                    <p style="text-align: center; font-size: 20px; font-weight: bold;">{configStatus} 
+                        <template if:false={closeStatus}>
+                            <img style="width: 4%; margin: 2%;" src={lodingimg}>
+                        </template>
+                    </p>
+            </div>
+            <template if:true={closeStatus}>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={hideStatus}>Close</button>
+                 </footer>
+            </template>
+        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <template if:true={showCompare}>
+
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container" style="max-width: 60rem !important;">
+            <!-- modal header start -->
+            <header class="slds-modal__header">
+                <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate">Compare View</h2>
+            </header>
+        
+            <!-- modal body start -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
+                <p style="text-align: center; font-size: 20px; font-weight: bold;">
+                    <template if:true={haveCmpRecord}>
+                        <lightning-datatable hide-checkbox-column="true" key-field="id" data={compareRecords} columns={cmpData}></lightning-datatable>
+                    </template>
+                    <template if:false={haveCmpRecord}>
+                        There are no changes
+                    </template>
+                </p>
+            </div>
+            <!-- <template if:true={closeStatus}> -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" data-compare="true" onclick={hideStatus}>Close</button>
+                 </footer>
+            <!-- </template> -->
+        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showItems}>
+
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
+            
+        <div class="slds-modal__container">
+
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                <lightning-icon icon-name="utility:close"
+                    alternative-text="close"
+                    variant="inverse"
+                    size="small" ></lightning-icon>
+                <span class="slds-assistive-text">Close</span>
+            </button>
+            <template if:true={deployEntire}>
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-06" class="slds-text-heading_medium slds-hyphenate">Select Items</h2>
+                </header>
+                <!-- modal body start -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-6">
+                    <lightning-accordion 
+                            allow-multiple-sections-open
+                            onsectiontoggle={handleSectionToggle}
+                            active-section-name="Groups">
+                        <lightning-accordion-section name="Groups" label="Groups">
+                            <fieldset class="slds-form-element ">
+                                <div class="slds-form-element__control slds-grid slds-wrap">
+                                    <template for:each={groupDetails} for:item="item">
+                                        <div key={item} class="slds-float_left slds-col slds-size_12-of-12">
+                                            <input type="checkbox" name="options" id={item} value={item} data-section="group" onclick={handleItemsChange}/>
+                                            <label class="slds-checkbox__label" for={item}>
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label slds-p-left_large" style="font-size:125%;">{item}</span>
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </fieldset>
+                        </lightning-accordion-section>
+                        <lightning-accordion-section name="Permission Sets" label="Permission Sets">
+                            <fieldset class="slds-form-element ">
+                                <div class="slds-form-element__control slds-grid slds-wrap">
+                                    <template for:each={pSetDetails} for:item="item">
+                                        <div key={item.Name} class="slds-float_left slds-col slds-size_12-of-12">
+                                            <input type="checkbox" name="options" id={item.Name} value={item.Name} data-section="permissionset" onclick={handleItemsChange}/>
+                                            <label class="slds-checkbox__label" for={item.Name}>
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label slds-p-left_large" style="font-size:125%;">{item.Label}</span>
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </fieldset>
+                        </lightning-accordion-section>
+                        <lightning-accordion-section name="Reports" label="Reports">
+                            <fieldset class="slds-form-element ">
+                                <div class="slds-form-element__control slds-grid slds-wrap">
+                                    <template for:each={reportDetails} for:item="item">
+                                        <div key={item.DeveloperName} class="slds-float_left slds-col slds-size_12-of-12">
+                                            <input type="checkbox" name="options" id={item.DeveloperName} value={item.DeveloperName} data-section="reports" onclick={handleItemsChange}/>
+                                            <label class="slds-checkbox__label" for={item.DeveloperName}>
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label slds-p-left_large" style="font-size:125%;">{item.Name}</span>
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </fieldset>
+                        </lightning-accordion-section>
+                        <lightning-accordion-section name="Dashboards" label="Dashboards">
+                            <fieldset class="slds-form-element ">
+                                <div class="slds-form-element__control slds-grid slds-wrap">
+                                    <template for:each={dashDetails} for:item="item">
+                                        <div key={item.DeveloperName} class="slds-float_left slds-col slds-size_12-of-12">
+                                            <input type="checkbox" name="options" id={item.DeveloperName} value={item.DeveloperName} data-section="dashboard" onclick={handleItemsChange}/>
+                                            <label class="slds-checkbox__label" for={item.DeveloperName}>
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label slds-p-left_large" style="font-size:125%;">{item.Title}</span>
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </fieldset>
+                        </lightning-accordion-section>
+                        <lightning-accordion-section name="Custom Setting" label="Custom Setting">
+                            <fieldset class="slds-form-element ">
+                                <div class="slds-form-element__control slds-grid slds-wrap">
+                                    <template for:each={cusDetail} for:item="item">
+                                        <div key={item.QualifiedApiName} class="slds-float_left slds-col slds-size_12-of-12">
+                                            <input type="checkbox" name="options" id={item.QualifiedApiName} value={item.QualifiedApiName} data-section="customsetting" onclick={handleItemsChange}/>
+                                            <label class="slds-checkbox__label" for={item.QualifiedApiName}>
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label slds-p-left_large" style="font-size:125%;">{item.Label}</span>
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </fieldset>
+                        </lightning-accordion-section>
+                        <lightning-accordion-section name="Profile" label="Profile">
+                            <fieldset class="slds-form-element ">
+                                <div class="slds-form-element__control slds-grid slds-wrap">
+                                    <template for:each={proDetail} for:item="item">
+                                        <div key={item.Name} class="slds-float_left slds-col slds-size_12-of-12">
+                                            <input type="checkbox" name="options" id={item.Name} value={item.Name} data-section="profile" onclick={handleItemsChange}/>
+                                            <label class="slds-checkbox__label" for={item.Name}>
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label slds-p-left_large" style="font-size:125%;">{item.Name}</span>
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </fieldset>
+                        </lightning-accordion-section>
+                        <lightning-accordion-section name="task" label="Task - Record Type">
+                            <fieldset class="slds-form-element ">
+                                <div class="slds-form-element__control slds-grid slds-wrap">
+                                    <template for:each={taskDetails} for:item="item">
+                                        <div key={item} class="slds-float_left slds-col slds-size_12-of-12">
+                                            <input type="checkbox" name="options" id={item} value={item} data-section="task" onclick={handleItemsChange}/>
+                                            <label class="slds-checkbox__label" for={item}>
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label slds-p-left_large" style="font-size:125%;">{item}</span>
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </fieldset>
+                        </lightning-accordion-section>
+                    </lightning-accordion>
+                </div>
+            </template>
+            <template if:false={deployEntire}>
+                <!-- PERMISSION AND PROFILE VIEW -->
+                <template if:true={permission_profile}>
+
+                    <!-- modal header start -->
+                    <header class="slds-modal__header">
+                        <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">Select {migrateField}</h2>
+                    </header>
+                
+                    <!-- modal body start -->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
+                        <fieldset class="slds-form-element slds-align_absolute-center">
+                            <div class="slds-form-element__control slds-grid slds-wrap">
+
+
+
+                                <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_info" style="display: flex; justify-content: center; align-content:center;width:40rem">
+                                    Permissions
+                                </div>
+                                
+                                <template for:each={selectItems} for:item="item">
+                                    
+                                    <div key={item.value} class="slds-float_left slds-col slds-size_12-of-12 slds-p-left_large">
+        
+                                        <input type="checkbox" name="options" id={item.value} value={item.value} onclick={handleItemsChange}/>
+        
+                                        <label class="slds-checkbox__label slds-p-left_large" for={item.value}>
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label" style="font-size:125%;">{item.label}</span>
+                                        </label>
+        
+                                    </div>
+                                </template>
+
+                                <br>
+
+                                <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_info" style="display: flex; justify-content: center; align-content:center;width:40rem">
+                                    Profiles
+                                </div>
+                                
+                                <template for:each={profiles} for:item="item">
+                                    
+                                    <div key={item.value} class="slds-float_left slds-col slds-size_12-of-12 slds-p-left_large">
+        
+                                        <input type="checkbox" name="options" id={item.value} value={item.value} onclick={selectProfiles}/>
+        
+                                        <label class="slds-checkbox__label slds-p-left_large" for={item.value}>
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label" style="font-size:125%;">{item.label}</span>
+                                        </label>
+        
+                                    </div>
+                                </template>
+        
+                            </div>
+                        </fieldset>
+                    </div>
+                </template>
+                <!-- PERMISSION AND PROFILE VIEW ENDED-->
+
+
+
+                <!-- NORAML VIEW -->
+                <template if:false={permission_profile}>
+                    
+                    <!-- modal header start -->
+                    <header class="slds-modal__header">
+                        <h2 id="modal-heading-05" class="slds-text-heading_medium slds-hyphenate">Select {migrateField}</h2>
+                    </header>
+                
+                    <!-- modal body start -->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-5">
+                        <template if:true={noRelatedTask}>
+                            <div class="slds-align_absolute-center">
+                                <b>There is no change in Related Task.</b>
+                            </div>
+                        </template>
+                        <template if:false={noRelatedTask}>
+                            <fieldset class="slds-form-element slds-align_absolute-center">
+                                <div class="slds-form-element__control slds-grid slds-wrap">
+                                    <template for:each={selectItems} for:item="item">
+            
+                                        <div key={item.value} class="slds-float_left slds-col slds-size_12-of-12">
+            
+                                            <input type="checkbox" name="options" id={item.value} value={item.value} onclick={handleItemsChange}/>
+            
+                                            <label class="slds-checkbox__label slds-p-left_large" for={item.value}>
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label" style="font-size:125%;">{item.label}</span>
+                                            </label>
+            
+                                        </div>
+                                    </template>
+                                </div>
+                            </fieldset>
+                        </template>
+                    </div>
+                </template>
+                <!-- NORMAL VIEW ENDED -->
+            </template>
+
+            <!-- <template if:true={closeStatus}> -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleDeployExtraItems}>Deploy</button>
+                 </footer>
+            <!-- </template> -->
+        </div>
+        </section>
+
+
+        
+
+
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+        <lightning-card class="" title="">
+            <div style="padding-left: 22px;">
+                <lightning-button variant="brand" label="Back" title="Primary action" onclick={goBack} class="slds-m-left_x-small" icon-name="utility:back"></lightning-button>
+            </div>        
+            <br/>
+            <!-- Customer Details Section -->
+            <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                <div class="slds-col slds-size_4-of-5">
+                    <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;">
+                        Customer Details
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-5">
+                    <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;">
+                        Actions
+                    </div>
+                </div>
+            </div>
+
+            <br />
+            <!-- Customer Row Grid 1 -->
+            <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                <!-- Left section -->
+                <div class="slds-col slds-size_4-of-5" style="display: flex;">
+                    <div class="slds-col slds-size_1-of-2 slds-form-element">
+                        <label class="slds-form-element__label" for="text-input-id-47">Customer Name</label>
+                        <div class="slds-form-element__control" >
+                            <!-- Customer Name : {CustomerName} style="border: 2px; border-color: black; display: flex; justify-content: center; align-content:center; border-style: solid; background-color: #F6DD81;" -->
+                            <input type="text" id="text-input-id-47" readonly="" placeholder="" class="slds-input" value={CustomerName} />
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label" for="text-input-id-47">Customer Type</label>
+                        <div class="slds-form-element__control" >
+                            <input type="text" id="text-input-id-67" readonly="" placeholder="" class="slds-input" value={Type} />
+                        </div>
+                    </div>
+                </div>
+                <!-- right section -->
+                <div class="slds-col slds-size_1-of-5">
+                    <div class="slds-col slds-size_1-of-1">
+                        <div style="display: flex; justify-content: center; align-content:center;">
+                            <lightning-button variant="brand" label="Update" title="Primary action" onclick={handleAccountUpdate} class="slds-m-left_x-small"></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br/>
+            <!-- Customer Row Grid 2 -->
+            <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                <!-- Left section -->
+                <div class="slds-col slds-size_4-of-5" style="display: flex;">
+                    <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label" for="text-input-id-47">Last Success Rep.</label>
+                        <div class="slds-form-element__control" >
+                            <input type="text" id="text-input-id-1" readonly="" placeholder="" class="slds-input" value={lastUserRep} />
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label" for="text-input-id-47"> Last Customer Contact </label>
+                        <div class="slds-form-element__control" >
+                            <input type="text" id="text-input-id-2" readonly="" placeholder="" class="slds-input" value={lastCustomerContact}/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br/>
+            <!-- Customer Row Grid 3 -->
+            <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                <!-- Left section -->
+                <div class="slds-col slds-size_4-of-5" style="display: flex;">
+                    <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label" for="text-input-id-47">Average Cycle Time</label>
+                        <div class="slds-form-element__control" >
+                            <input type="text" id="text-input-id-3" readonly="" placeholder="" class="slds-input" value={avgCycTime} />
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2"><label class="slds-form-element__label" for="text-input-id-47">Number of (Open / On hold or In Development) items</label>
+                        <div class="slds-form-element__control" >
+                            <input type="text" id="text-input-id-4" readonly="" placeholder="" class="slds-input" value={totalItems} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br/>
+            <!-- Customer Row Grid 4 -->
+            <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                <!-- Left section -->
+                <div class="slds-col slds-size_4-of-5" style="display: flex;">
+                    <div class="slds-col slds-size_1-of-2"><label class="slds-form-element__label" for="text-input-id-47">Date of Last Migration</label>
+                        <div class="slds-form-element__control" >
+                            <input type="text" id="text-input-id-5" readonly="" placeholder="" class="slds-input" value="Date of Last Migration test static"/>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label" for="text-input-id-47">Statuses</label>
+                        <div class="slds-form-element__control" >
+                            <input type="text" id="text-input-id-6" readonly="" placeholder="" class="slds-input" value={Status} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br/>
+            <br/>
+
+            
+               
+
+            <!-- Configuration Item Section -->
+            <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                <div class="slds-col slds-size_4-of-5">
+                    <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;">
+                        Configuration Item List
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-5" style="display: flex;">
+                    <div class="slds-col slds-size_1-of-2">
+                        <div style="display: flex; justify-content: center; align-content:center;">
+                            <lightning-button variant="brand" label="New" title="Primary action" onclick={handleInsertConfigItemList} class="slds-m-left_x-small"></lightning-button>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <div style="display: flex; justify-content: center; align-content:center;">
+                            <lightning-button variant="brand" label="Refresh" title="Primary action" onclick={getConfigRec} class="slds-m-left_x-small"></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br/>
+            
+                <template if:true={relatedConfigItems}>
+                    <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                        <div class="slds-col slds-size_5-of-5 slds-border_bottom dataTableClass">
+                            <!-- <template if:true={relatedConfigItems}> -->
+                                <lightning-datatable key-field="id"
+                                                    data={relatedConfigItems}
+                                                    columns={columns}
+                                                    hide-checkbox-column=”true”
+                                                    onrowaction={handleConfigRow}
+                                                    sorted-by={sortBy}
+                                                    sorted-direction={sortDirection}
+                                                    onsort={doSorting}
+                                                    class="slds-border_bottom">
+                                </lightning-datatable>
+                                <!-- <lightning-datatable data={relatedConfigItems}
+                                                    columns={columns}
+                                                    key-field="id"
+                                                    data-id="table"    
+                                                    sorted-by={sortBy}
+                                                    sorted-direction={sortDirection}
+                                                    onsort={doSorting}                                    
+                                                    hide-checkbox-column="true"
+                                                    show-row-number-column="true"
+                                                    onrowaction={handleRowAction}>
+                                </lightning-datatable>                     -->
+                            <!-- </template> -->
+                        </div>
+                    </div>
+                </template>
+                <template if:false={relatedConfigItems}>
+                    <div class="slds-col slds-size_5-of-5">
+                        <h1 style="font-weight: bolder; text-align: center; font-size: medium;">There are no Configurations ( Opened / In Development / On Hold )</h1>
+                    </div>
+                </template>
+            
+
+                <br />
+                <br />
+
+                 <!-- Processes Used Section -->
+                 <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                    <div class="slds-col slds-size_4-of-5">
+                        <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;">
+                            Processes Used
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5" style="display: flex;">
+                        <div class="slds-col slds-size_1-of-2">
+                            <div style="display: flex; justify-content: center; align-content:center;">
+                                <lightning-button variant="brand" label="New" title="Primary action" onclick={newProject} class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                            <!-- <div style="border: 2px; border-color: black; display: flex; justify-content: center; align-content:center; border-style: solid; background-color: #A3CFF1;">
+                                New
+                            </div> -->
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <div style="display: flex; justify-content: center; align-content:center;">
+                                <lightning-button variant="brand" label="Refresh" title="Primary action" onclick={getProjects} class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                            <!-- <div style="border: 2px; border-color: black; display: flex; justify-content: center; align-content:center; border-style: solid; background-color: #A3CFF1;">
+                                Refresh
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+
+                <br/>
+                <!-- Processes Used -->
+                
+                    <template if:true={projList}>
+                        <div class="slds-grid slds-gutters" style="padding: 0% 2%;overflow:true">
+                            <div class="slds-col slds-size_5-of-5 slds-border_bottom dataTableClass">
+                                <lightning-datatable key-field="id"
+                                                    data={projList}
+                                                    columns={processUsedCol} 
+                                                    scroll-hidden="true"
+                                                    hide-checkbox-column=”true”
+                                                    onrowaction={handleProcessRow}
+                                                    class="slds-border_bottom"
+                                                    style="height: 120px;"
+                                                    >
+                                </lightning-datatable>
+                            </div>
+                        </div>
+                    </template>
+                    <template if:false={projList}>
+                        <div class="slds-col slds-size_5-of-5">
+                            <h1 style="font-weight: bolder; text-align: center; font-size: medium;">There are no Process Used</h1>
+                        </div>
+                    </template>
+                
+            <!-- Processes Used Header Section -->
+            <!-- <div class="slds-grid slds-gutters" style="padding: 0% 2%;"> -->
+                <!-- Left section -->
+                <!-- <div class="slds-col slds-size_4-of-5"> -->
+                    
+                    
+
+                    <!-- <div class={tableStyle}>
+                        <table aria-describedby="customers-list" class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered slds-table_resizable-cols">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th class="slds-text-align_right" scope="col" style="width:3.25rem">
+                                        <div class="slds-truncate slds-assistive-text" id="column-group-header" title="Choose a row to select">Choose a row to select</div>
+                                    </th> 
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate " title="Process Name" style="text-align: center;font-size: medium">Process Name</div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate " title="Status" style="text-align: center;font-size: medium">Status</div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate " title="Controller Doc" style="text-align: center;font-size: medium">Controlled Doc</div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate " title="Production"  style="text-align: center;font-size: medium">Production
+                                        </div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate " title="Complaint" style="text-align: center;font-size: medium">Complaint
+                                        </div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate " title="Design" style="text-align: center;font-size: medium">Design
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            </table> -->
+                            <!--Body of the table-->
+                    <!-- </div>
+                </div>
+            </div> -->
+
+            <!-- Processes Used List Section -->
+            <!-- <template for:each={projList} for:item="item" for:index="indexVar">
+                <br key={item.Name} />
+                <div class="slds-grid slds-gutters" style="padding: 0% 2%;" key={item.Name}>
+                    <div class="slds-col slds-size_4-of-5">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered slds-table_resizable-cols">
+                            <tbody>
+                                <tr class="slds-hint-parent">
+                                    <td scope="col">
+                                        <lightning-input type="checkbox" data-id={item.Id} onchange={handleRadioBtnChange} label="" name="input1"></lightning-input>
+                                    </td> 
+                                    <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id}>
+                                        <div>
+                                            <a>{item.Name}</a>
+                                        </div>
+                                    </td>
+                                    <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id}>
+                                        <div>
+                                            {item.Simploud__Status__c}
+                                        </div>
+                                    </td>
+                                    <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id}>
+                                        <div>
+                                        {item.Rating} 
+                                        </div>
+                                    </td>
+                                    <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id}>
+                                        <div onclick={setCustomerId} data-recid={item.Id}>
+                                            {item.NumberOfEmployees} 
+                                        </div>
+                                    </td>
+                                    <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id}>
+                                        <div>
+                                            {item.AnnualRevenue} 
+                                        </div>
+                                    </td>
+                                    <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id}>
+                                        <div onclick={setCustomerId} data-recid={item.Id}>
+                                            {item.NumberOfEmployees} 
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5" style="display: flex;">
+                        <div class="slds-col slds-size_1-of-2">
+                            <div style="display: flex; justify-content: center; align-content:center;">
+                                <lightning-button variant="brand" label="Compare" title="Primary action" onclick={handleClick} class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <div style="display: flex; justify-content: center; align-content:center;">
+                                <lightning-button variant="brand" label="Deploy" title="Primary action" onclick={handleClick} class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template> -->
+
+            
+            <br/>
+            <br/>
+
+            <!-- Call Logs Section -->
+            <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                <div class="slds-col slds-size_4-of-5">
+                    <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;">
+                        Call Logs
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-5">
+                    <div class="slds-col slds-size_1-of-1">
+                        <div style="display: flex; justify-content: center; align-content:center;">
+                            <lightning-button variant="brand" label="Add Call" title="Primary action" onclick={handleAddCall} class="slds-m-left_x-small"></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <template if:true={relatedCallLogs}>
+                <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                    <div class="slds-col slds-size_5-of-5 slds-border_bottom dataTableClass">
+                        <lightning-datatable key-field="id"
+                                            data={relatedCallLogs}
+                                            columns={callLogsCol}
+                                            hide-checkbox-column=”true”
+                                            class="slds-border_bottom">
+                        </lightning-datatable>
+                    </div>
+                </div>
+            </template>
+            <template if:false={relatedCallLogs}>
+                <div class="slds-col slds-size_5-of-5">
+                    <h1 style="font-weight: bolder; text-align: center; font-size: medium;">There are no Call Logs</h1>
+                </div>
+            </template>
+        </lightning-card>
+
+
+
+        
+        <template if:true={isModalOpen}>
+            <!-- Modal/Popup Box LWC starts here -->
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <template if:true={showFullScreenSpinner}>
+                    <lightning-spinner class="slds-is-fixed" alternative-text="Loading" size="large"></lightning-spinner>
+                </template>
+                <div class="slds-modal__container">
+                    <!-- Modal/Popup Box LWC header here -->
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close"
+                                alternative-text="close"
+                                variant="inverse"
+                                size="small" ></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Assign Internal Ownership</h2>
+                    </header>
+                    <!-- Modal/Popup Box LWC body starts here -->
+                    <div style="background-color: white; padding: 15px;">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-combobox_container">
+                                    <div id="box" class={boxClass} aria-expanded="true" aria-haspopup="listbox" role="combobox">
+                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+    
+                                            <template if:true={isValueSelected}>
+                                                <div id="lookup-pill" class="slds-pill-container">
+                                                    <div class="slds-grid slds-gutters">
+                                                        <div class="slds-col slds-size_1-of-3" style="text-align: center; padding-top: 5px;">
+                                                            <span>Current Owner:</span>
+                                                        </div>
+    
+                                                        <div class="slds-col slds-size_2-of-3">
+                                                            <div style="border: 0.5px solid lightgray; border-radius: 5px; padding: 2px;">
+                                                                <span class="slds-pill slds-pill_link" style="width: 100%">
+                                                                    <span class="slds-pill__icon_container">
+                                                                        <span class="slds-icon_container slds-icon-standard-account" title="Account">
+                                                                            <lightning-icon icon-name={iconName} alternative-text="acc" ></lightning-icon>
+                                                                        <span class="slds-assistive-text">User</span>
+                                                                        </span>
+                                                                    </span>
+                                                                    <a href={href} class="slds-pill__action" title="Full pill label verbiage mirrored here" style="color:inherit; text-decoration:none; pointer-events:none;">
+                                                                        <span class="slds-pill__label">{selectedName}</span>
+                                                                    </a>
+                                                                    <button class="slds-button slds-button_icon slds-button_icon slds-pill__remove" title="Remove" onclick={handleRemovePill}>
+                                                                        <lightning-icon icon-name="utility:close" alternative-text="acc" ></lightning-icon>
+                                                                        <span class="slds-assistive-text">Remove</span>
+                                                                    </button>
+                                                                </span>
+                                                                <!-- <lightning-pill class="pillSize" label={selectedName} name={selectedName} onremove={handleRemovePill} href={href}>
+                                                                    <lightning-icon icon-name={iconName} alternative-text="acc" ></lightning-icon>
+                                                                </lightning-pill> -->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+    
+                                            <template if:false={isValueSelected}>
+                                                <div class="slds-p-top_none">
+                                                    <div class="slds-grid slds-gutters">
+                                                        <div class="slds-col slds-size_1-of-3" style="text-align: center; padding-top: 5px;">
+                                                            <span>Select User:</span>
+                                                        </div>
+    
+                                                        <div class="slds-col slds-size_2-of-3">
+                                                            <lightning-input class={inputClass} type="search" id="input" value={searchTerm}
+                                                                            onclick={handleUserClick} onblur={onBlur} onchange={onChange}
+                                                                            variant="label-hidden" autocomplete="off" placeholder={searchPlaceholder} style="cursor: pointer;">
+                                                            </lightning-input>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+    
+                                            <template if:true={noOwnerSelectedFlag}>
+                                                <br/>
+                                                <div style="color: rgb(255, 0, 0); text-align: center;">
+                                                    <b>*</b>Please select a user.
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7" role="listbox" style="left: 67%; width: 65%;">
+                                            <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                                <template for:each={records} for:item="record">
+                                                    <li key={record.Id} onclick={onSelect} data-id={record.Id} role="presentation" data-name={record.Name} style="cursor: pointer;">
+                                                        <span class="" role="option">
+                                                            <lightning-icon class="slds-icon slds-icon--small slds-icon-text-default" icon-name={iconName} alternative-text={objName} size="small"></lightning-icon>
+                                                            <span class="slds-truncate" >{record.Name}</span>
+                                                        </span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal/Popup Box LWC footer starts here -->
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
+                        <button class="slds-button slds-button_brand" onclick={changeInternalOwner} title="OK">OK</button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+        
+
+        <template if:true={openMigration}>
+            <!-- <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
+
+ 
+
+                <div class="slds-modal__container">
+                    
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close"
+                                alternative-text="close"
+                                variant="inverse"
+                                size="small" ></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">Assign Internal Ownership</h2>
+                    </header>
+
+                    
+                    <div style="background-color: white; padding: 15px;">
+                        
+                        
+                        <div class="slds-grid slds-gutters">
+                            <div></div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <h1>Customer Name</h1>
+                                <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Name" />
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <h1>Customer Type</h1>
+                                <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Type" />
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <h1>Status</h1>
+                                <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Status" />
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <h1>Object Name</h1>
+                                <input type="text" readonly="" placeholder="" class="slds-input" value="Object Name" />
+                            </div>
+                        </div>
+                        
+                        <br>
+                        
+                        <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                            <div class="slds-col slds-size_4-of-5">
+                                <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;">
+                                    Customer Details
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-5">
+                                <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;">
+                                    Actions
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <br>
+                        
+                        <div class="slds-grid slds-gutters">
+                            <div></div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <h1>Configuration Area</h1>
+                                <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Name" />
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <h1>Source</h1>
+                                <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Type" />
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <h1>Target</h1>
+                                <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Status" />
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col" >
+                                        <lightning-button variant="brand" label="Compare" title="Primary action" onclick={handle} class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                    <div class="slds-col slds-m-right_xx-large" >
+                                        <lightning-button variant="brand" label="Deploy" title="Primary action" onclick={handle} class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        
+                    </div>
+
+                    
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
+                    </footer>
+                </div>
+            </section> -->
+
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+                    
+                    <div class="slds-modal__header">
+                      <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                          <lightning-icon icon-name="utility:close"
+                              alternative-text="close"
+                              variant="inverse"
+                              size="small" ></lightning-icon>
+                          <span class="slds-assistive-text">Close</span>
+                      </button>
+                    <h1  class="slds-modal__title slds-hyphenate">Deployment View</h1>
+                  </div>
+                  <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    
+                    <!-- <div class="slds-grid slds-gutters slds-m-left_xx-large">
+                        <div></div>
+                        <div class="slds-col slds-size_1-of-4">
+                            <h1>Customer Name</h1>
+                            <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Name" />
+                        </div>
+                        <div class="slds-col slds-size_1-of-4">
+                            <h1>Customer Type</h1>
+                            <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Type" />
+                        </div>
+                        <div class="slds-col slds-size_1-of-4">
+                            <h1>Status</h1>
+                            <input type="text" readonly="" placeholder="" class="slds-input" value="Customer Status" />
+                        </div>
+                        <div class="slds-col slds-size_1-of-4">
+                            <h1>Object Name</h1>
+                            <input type="text" readonly="" placeholder="" class="slds-input" value="Object Name" />
+                        </div>
+                    </div> -->
+                    
+
+                    <div class="slds-grid slds-gutters" style="margin-left: 10px;">
+                        <div></div>
+                        <div class="slds-col slds-size_3-of-12">
+
+                            <article class="slds-card">
+                                <div class="slds-card__header slds-grid">
+                                  <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__body">
+                                      <h2 class="slds-card__header-title">
+                                        Customer Name
+                                    </h2>
+                                    <div class="slds-text-heading_small">{CustomerName}</div>
+                                    <!-- <input type="text" readonly="" placeholder="" class="slds-input" value={CustomerName} /> -->
+                                    </div>
+                                  </header>
+                                </div>
+                              </article>
+
+                        </div>
+                        <div class="slds-col slds-size_2-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__header slds-grid">
+                                  <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__body">
+                                      <h2 class="slds-card__header-title">
+                                          Customer Type
+                                        </h2>
+                                        <div class="slds-text-heading_small">{Type}</div>
+                                        <!-- <input type="text" readonly="" placeholder="" class="slds-input" value={Type} /> -->
+                                    </div>
+                                  </header>
+                                </div>
+                              </article>
+                        </div>
+                        <div class="slds-col slds-size_3-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__header slds-grid">
+                                  <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__body">
+                                      <h2 class="slds-card__header-title">
+                                        Customer Status
+                                    </h2>
+                                    <div class="slds-text-heading_small">{Status}</div>
+                                    <!-- <input type="text" readonly="" placeholder="" class="slds-input" value={Status} /> -->
+                                    </div>
+                                  </header>
+                                </div>
+                              </article>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__header slds-grid">
+                                  <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__body">
+                                      <h2 class="slds-card__header-title">
+                                        Object Name
+                                    </h2>
+                                    <div class="slds-text-heading_small">{ObjectUse}</div>
+                                    <!-- <input type="text" readonly="" placeholder="" class="slds-input" value={ObjectUse} /> -->
+                                    </div>
+                                  </header>
+                                </div>
+                              </article>
+                        </div>
+                        <!-- <div class="slds-col slds-size_1-of-4">
+                            <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;">
+                                Actions
+                            </div>
+                        </div> -->
+                    </div>
+
+                    <br>
+                    
+                    <div class="slds-grid slds-gutters" style="padding: 0% 2%; margin-left: 1px;">
+                        <div class="slds-col slds-size_3-of-4" style="margin-left: -20px;">
+                            <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;height:30px">
+                                <h2 class="slds-card__header-title slds-align_absolute-center">
+                                    Process Details
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <br>
+                    
+                    <div style="padding: 0% 2%;margin-left: 10px;">
+                        <div class="slds-grid slds-gutters slds-p-horizontal_small slds-section__title slds-theme_shade " style="margin-left: -20px;height: 30px;" >
+
+                            <div class="slds-col slds-size_1-of-4 slds-section__title slds-theme_shade " style="height: 30px;">
+
+                            
+                                        <h2 class="slds-card__header-title slds-align_absolute-center ">
+                                            Configuration Area
+                                        </h2>
+                            
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-section__title slds-theme_shade " style="height: 30px;">
+                                
+                                        <h2 class="slds-card__header-title slds-align_absolute-center">
+                                            Source
+                                        </h2>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-m-left_large slds-section__title slds-theme_shade " style="height: 30px;">
+                                
+                                        <h2 class="slds-card__header-title slds-align_absolute-center ">
+                                            Target
+                                        </h2>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-section__title slds-theme_shade " style="height: 30px;">
+                                
+                                <div class="slds-align_absolute-center">
+                                    <h2 class="slds-card__header-title">
+                                        Actions
+                                    </h2>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+                    
+                    <template for:each={migrationFields} for:item="ele">
+
+                        <div key={ele.fieldName} class="slds-grid slds-gutters">
+                            <div></div>
+                            <div class="slds-col slds-size_1-of-4 " style="padding: 0% 2%;margin-left: 10px;">
+                                
+                                          <h1>
+                                            <b class="field">{ele.fieldName}</b>
+                                          </h1>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-align_absolute-center">
+                                {ele.source}
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-align_absolute-center slds-m-right_xx-large">
+                                {ele.target}
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-grid slds-gutters slds-align_absolute-center ">
+                                <div class="slds-grid slds-gutters slds-align_absolute-center slds-m-right_xx-large">
+                                    <div class="slds-col slds-align_absolute-center" >
+                                        <lightning-button variant="brand" data-carea={ele.fieldName} label="Compare" title="Primary action" onclick={handleCompare} ></lightning-button>
+                                    </div>
+                                    <div class="slds-col slds-align_absolute-center slds-m-right_xx-large" >
+                                        <lightning-button data-name={ele.fieldName} variant="brand" label="Deploy" title="Primary action" onclick={handleClickDeploy} class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <br key={ele.fieldName}>
+                        
+                        
+                    </template>
+
+                    <!-- Global Section -->
+                    <div class="slds-grid slds-gutters" style="padding: 0% 2%; margin-left: 1px;">
+                        <div class="slds-col slds-size_3-of-4" style="margin-left: -20px;">
+                            <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;height:30px">
+                                <h2 class="slds-card__header-title slds-align_absolute-center">
+                                    Global Details
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <br>
+                    
+                    <div style="padding: 0% 2%;margin-left: 10px;">
+                        <div class="slds-grid slds-gutters slds-p-horizontal_small slds-section__title slds-theme_shade " style="margin-left: -20px;height: 30px;" >
+
+                            <div class="slds-col slds-size_1-of-4 slds-section__title slds-theme_shade " style="height: 30px;">
+
+                            
+                                        <h2 class="slds-card__header-title slds-align_absolute-center ">
+                                            Configuration Area
+                                        </h2>
+                            
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-section__title slds-theme_shade " style="height: 30px;">
+                                
+                                        <h2 class="slds-card__header-title slds-align_absolute-center">
+                                            Source
+                                        </h2>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-m-left_large slds-section__title slds-theme_shade " style="height: 30px;">
+                                
+                                        <h2 class="slds-card__header-title slds-align_absolute-center ">
+                                            Target
+                                        </h2>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-section__title slds-theme_shade " style="height: 30px;">
+                                
+                                <div class="slds-align_absolute-center">
+                                    <h2 class="slds-card__header-title">
+                                        Actions
+                                    </h2>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+
+                    <template for:each={globalFields} for:item="ele">
+
+                        <div key={ele.fieldName} class="slds-grid slds-gutters">
+                            <div></div>
+                            <div class="slds-col slds-size_1-of-4 " style="padding: 0% 2%;margin-left: 10px;">
+                                
+                                          <h1>
+                                            <b class="field">{ele.fieldName}</b>
+                                          </h1>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-align_absolute-center">
+                                {ele.source}
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-align_absolute-center slds-m-right_xx-large">
+                                {ele.target}
+                            </div>
+                            <div class="slds-col slds-size_1-of-4 slds-grid slds-gutters slds-align_absolute-center ">
+                                <div class="slds-grid slds-gutters slds-align_absolute-center slds-m-right_xx-large">
+                                    <div class="slds-col slds-align_absolute-center" >
+                                        <lightning-button variant="brand" data-carea={ele.fieldName} label="Compare" title="Primary action" onclick={handleCompare} ></lightning-button>
+                                    </div>
+                                    <div class="slds-col slds-align_absolute-center slds-m-right_xx-large" >
+                                        <lightning-button data-name={ele.fieldName} variant="brand" label="Deploy" title="Primary action" onclick={handleClickDeploy} class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <br key={ele.fieldName}>
+                        
+                        
+                    </template>
+
+                    <!--Data Section-->
+
+                    <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                        <div class="slds-col slds-size_3-of-4">
+                            <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;height:30px">
+                                <h2 class="slds-card__header-title slds-align_absolute-center">
+                                    Data
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <br>
+
+                    <div class="slds-grid slds-gutters">
+                        <div></div>
+                        <div class="slds-col slds-size_1-of-4 " style="padding: 0% 2%;margin-left: 10px;">
+                            
+                                      <h1>
+                                        <b>Compliance Configuration</b>
+                                      </h1>
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-align_absolute-center">
+                            {complianceSource}
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-align_absolute-center slds-m-right_xx-large">
+                            {complianceTarget}
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-grid slds-gutters slds-align_absolute-center">
+                            <div class="slds-grid slds-gutters slds-align_absolute-center slds-m-right_xx-large">
+                                <div class="slds-col slds-align_absolute-center" >
+                                    <lightning-button variant="brand" data-name="Complaince Configuration" label="Compare" title="Primary action" onclick={handleCompare} ></lightning-button>
+                                </div>
+                                <div class="slds-col slds-align_absolute-center slds-m-right_xx-large" >
+                                    <lightning-button variant="brand" data-name="Complaince Configuration" label="Deploy" title="Primary action" onclick={handleClickDeploy} class="slds-m-left_x-small"></lightning-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="slds-grid slds-gutters">
+                        <div></div>
+                        <div class="slds-col slds-size_1-of-4 " style="padding: 0% 2%;margin-left: 10px;">
+                            
+                                      <h1>
+                                        <b>Custom Settings</b>
+                                      </h1>
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-align_absolute-center ">
+                            {customSettingsSource}
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-align_absolute-center slds-m-right_xx-large">
+                            {customSettingsTarget}
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-grid slds-gutters slds-align_absolute-center">
+                            <div class="slds-grid slds-gutters slds-align_absolute-center slds-m-right_xx-large">
+                                <div class="slds-col slds-align_absolute-center" >
+                                    <lightning-button variant="brand" label="Compare" data-carea="Custom Settings" title="Primary action" onclick={handleCompare} ></lightning-button>
+                                </div>
+                                <div class="slds-col slds-align_absolute-center slds-m-right_xx-large" >
+                                    <lightning-button variant="brand" label="Deploy" data-name="Custom Settings" title="Primary action" onclick={handleClickDeploy} class="slds-m-left_x-small"></lightning-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+
+                    <!--Related Object Tasks-->
+
+                    <div class="slds-grid slds-gutters" style="padding: 0% 2%;">
+                        <div class="slds-col slds-size_3-of-4">
+                            <div class="slds-truncate slds-p-horizontal_small  slds-section__title slds-theme_shade" style="display: flex; justify-content: center; align-content:center;height:30px">
+                                <h2 class="slds-card__header-title slds-align_absolute-center">
+                                    Related Object Tasks
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <br>
+
+                    <div class="slds-grid slds-gutters">
+                        <div></div>
+                        <div class="slds-col slds-size_1-of-4 " style="padding: 0% 2%;margin-left: 10px;">
+                            
+                                      <h1>
+                                        <b>Related Object</b>
+                                      </h1>
+                        </div>
+                        <div class="slds-col slds-size_2-of-4 ">
+                            <div class="slds-text-heading_small">{relatedObjects}</div>
+                            <!-- <input type="text" readonly="" placeholder="" class="slds-input" value={relatedObjects} /> -->
+                        </div>
+                        <div class="slds-col slds-size_1-of-4"></div>
+                    </div>
+
+                    <br>
+
+                    <div class="slds-grid slds-gutters">
+                        <div></div>
+                        <div class="slds-col slds-size_1-of-4 " style="padding: 0% 2%;margin-left: 10px;">
+                            
+                                      <h1>
+                                        <b>Related Tasks</b>
+                                      </h1>
+                        </div>
+                        <div class="slds-col slds-size_2-of-4 slds-align_absolute-center">
+                            <div class="slds-text-heading_small">{compliancRelatedTask}</div>
+                            <!-- <input type="text" readonly="" placeholder="" class="slds-input slds-wrap"  value={compliancRelatedTask} /> -->
+                        </div>
+                        <div class="slds-col slds-size_1-of-4"></div>
+                    </div>
+
+                    <br>
+
+                    <div class="slds-grid slds-gutters" style="padding: 0% 2%;margin-left: 10px;">
+                        <div class="slds-col slds-size_4-of-4" style="margin-left: -30px;" >
+                            <button onclick={handleClickDeploy} data-name="Entire" class="slds-button slds-button_brand slds-col slds-size_4-of-4" style="width: 65vw;height: 5vh;">Deploy Entire Project</button>
+                        </div>
+                    </div>
+
+                  </div>
+                  <div class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
+                  </div>
+                </div>
+              </section>
+              <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+
+</template>

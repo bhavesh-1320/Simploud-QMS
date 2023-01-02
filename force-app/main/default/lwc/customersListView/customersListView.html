@@ -1,0 +1,264 @@
+<template>
+    <!-- <div style="height: 300px;">
+        <lightning-datatable
+                key-field="id"
+                data={data}
+                columns={columns}
+                onrowaction={handleRowAction}>
+        </lightning-datatable>
+    </div> -->
+    <template if:true={spin}>
+
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <!-- modal header start -->
+            <header class="slds-modal__header">
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Status</h2>
+            </header>
+        
+            <!-- modal body start -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+                    <p style="text-align: center; font-size: 20px; font-weight: bold;">{status} 
+                        <template if:false={closeStatus}>
+                            <img style="width: 4%; margin: 2%;" src={loadingimg} />
+                        </template>
+                    </p>
+            </div>
+            <template if:true={closeStatus}>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={hideStatus}>Close</button>
+                 </footer>
+            </template>
+        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showCustomerList}>
+
+        <lightning-tabset >
+            <lightning-tab label="Pending Evaluation" value="Pending Evaluation" onactive={handleActive}></lightning-tab>
+            <lightning-tab label="Evaluation In Progress" value="Evaluation In Progress"  onactive={handleActive}></lightning-tab>
+            <lightning-tab label="Active-Pending Project Launch" value="Active-Pending Project Launch" onactive={handleActive}></lightning-tab>
+            <lightning-tab label="Active-Initial Design" value="Active-Initial Design" onactive={handleActive}></lightning-tab>
+            <lightning-tab label="Active Customer" value="Active Customer" onactive={handleActive}></lightning-tab>
+            <lightning-tab label="Retired" value="Retired" onactive={handleActive}></lightning-tab>
+        </lightning-tabset>
+        <div if:true={showFullScreenSpinner} style="align-items: center;">
+            <lightning-spinner class="slds-align_absolute-center" alternative-text="Loading" size="large"></lightning-spinner>
+        </div>
+
+        <lightning-card class="" icon-name="utility:table" title="Customers List View">
+            <!--Account List table starts-->
+            <template if:true={renderTable}>
+                <div class="tableDiv">
+                    <div class={tableStyle}>
+                        <table aria-describedby="customers-list" class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered slds-table_resizable-cols">
+                            <!--Header of the table-->
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <!-- <th class="slds-text-align_right" scope="col" style="width:3.25rem">
+                                        <div class="slds-truncate slds-assistive-text" id="column-group-header" title="Choose a row to select">Choose a row to select</div>
+                                    </th> -->
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate slds-text-title" title="Customer Name" style="text-align: center;font-size: medium">Customer Name</div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate slds-text-title" title="Type" style="text-align: center;font-size: medium">Type</div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate slds-text-title" title="Country" style="text-align: center;font-size: medium">Country</div>
+                                        <!-- <div class="slds-resizable">
+                                            <input type="range" aria-label="Name column width" class="slds-resizable__input slds-assistive-text" id="cell-resize-handle-598" max="1000" min="20" tabindex="0" />
+                                            <span class="slds-resizable__handle">
+                                            <span class="slds-resizable__divider"></span>
+                                            </span>
+                                        </div> -->
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate slds-text-title" title="Status" style="text-align: center;font-size: medium">Status
+                                        </div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate slds-text-title" title="Customer Rating" style="text-align: center;font-size: medium">Customer Rating
+                                        </div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate slds-text-title" title="Open Items" style="text-align: center;font-size: medium">Open Items
+                                        </div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate slds-text-title" title="Last Activity" style="text-align: center;font-size: medium">Last Activity
+                                        </div>
+                                    </th>
+                                    <th class="slds-size_1-of-6" scope="col">
+                                        <div class="slds-truncate slds-text-title" title=""></div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <!--Body of the table-->
+                            <tbody>
+                                <template for:each={custListStatus} for:item="item" for:index="indexVar">
+                                    <tr key={item.Name} class="slds-hint-parent">
+                                        <!-- <td scope="col">
+                                            <lightning-input type="checkbox" data-id={item.Id} onchange={handleRadioBtnChange} label="" name="input1"></lightning-input>
+                                        </td> -->
+                                        <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id} >
+                                            <div>
+                                                <a>{item.Name}</a>
+                                            </div>
+                                        </td>
+                                        <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id} >
+                                            <div class="slds-align_absolute-center">
+                                                {item.Type}
+                                            </div>
+                                        </td>
+                                        <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id} >
+                                            <div class="slds-align_absolute-center">
+                                                <template if:true={item.Country}>
+                                                    {item.Country} <img class="slds-p-left_xx-small" src={item.img} height="30px" width="35px">
+                                                </template>
+                                                <template if:false={item.Country}>
+                                                    -
+                                                </template>
+                                            </div>
+                                        </td>
+                                        <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id} >
+                                            <div class="slds-align_absolute-center" onclick={setCustomerId} data-recid={item.Id}>
+                                                {item.Simploud__Status__c}
+                                            </div>
+                                        </td>
+                                        <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id} >
+                                            <div class="slds-align_absolute-center">
+                                                {item.Customer_Rating__c}
+                                            </div>
+                                        </td>
+                                        <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id} >
+                                            <div class="slds-align_absolute-center" onclick={setCustomerId} data-recid={item.Id}>
+                                                <template if:true={item.Simploud__Configuration_Items__r} >
+                                                    {item.Simploud__Configuration_Items__r.length}
+                                                </template>
+                                                <template if:false={item.Simploud__Configuration_Items__r} >
+                                                    0
+                                                </template>
+                                            </div>
+                                        </td>
+                                        <td class="slds-size_1-of-6" onclick={setCustomerId} data-recid={item.Id} >
+                                            <div>
+                                                <lightning-formatted-date-time value={item.LastModified} year="2-digit" month="short" day="2-digit" hour="numeric" minute="2-digit" second="2-digit"
+                                                    weekday="long"></lightning-formatted-date-time>
+                                            </div>
+                                        </td>
+                                        <td class="slds-size_1-of-6">
+                                            <div class="buttonMenu">
+                                                <lightning-button-menu alternative-text="Toggle menu" menu-alignment="right">
+                                                    <P onclick={setCustomerId} data-recid={item.Id}>
+                                                        <lightning-menu-item label="View" icon-name="utility:preview">
+                                                        </lightning-menu-item>
+                                                    </P>
+                                                    <p onclick={openModal} data-recid={item.Id} data-cusname={item.Name}>
+                                                        <lightning-menu-item label="Open CI" icon-name="utility:expand_alt">
+                                                        </lightning-menu-item>
+                                                    </p>
+                                                    <p onclick={backUpAction} data-rown={item.Id}>
+                                                        <lightning-menu-item label="Back Up" icon-name="action:upload">
+                                                        </lightning-menu-item>
+                                                    </p>
+                                                </lightning-button-menu>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </template>
+            <template if:false={renderTable}>
+                <h2 style="font-size: 20px;
+                font-weight: bold;
+                text-align: center;">There are no records</h2> 
+            </template>
+            
+        </lightning-card>
+    </template>
+
+    <!--Use template if:true to display/hide popup based on isModalOpen value--> 
+
+    
+    <div if:true={showFullScreenSpinner} style="align-items: center;">
+        <lightning-spinner class="slds-align_absolute-center" alternative-text="Loading" size="large"></lightning-spinner>
+    </div>
+
+    <template if:false={showFullScreenSpinner}>
+        <template if:true={isModalOpen}>
+            
+            
+            
+            <!-- Modal/Popup Box LWC starts here -->
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    
+                    <div class="slds-modal__header">
+                      <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                          <lightning-icon icon-name="utility:close"
+                              alternative-text="close"
+                              variant="inverse"
+                              size="small" ></lightning-icon>
+                          <span class="slds-assistive-text">Close</span>
+                      </button>
+                    <h1  class="slds-modal__title slds-hyphenate">Related Config Items</h1>
+                  </div>
+                  <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+
+
+                    
+                    
+                    <!-- Modal/Popup Box LWC body starts here -->
+                    
+                    
+                                <template if:true={showNoConfigItemFoundMsg} >
+                                    <h1 style="padding: 20px; background-color: white; text-align: center; font-weight: bold;">
+                                        No related records found!
+                                    </h1>
+                                </template>
+                                
+                                
+                                <template if:false={showNoConfigItemFoundMsg} >
+                                    
+                                            <div class="slds-border_bottom" >
+                                    
+                                                    <lightning-datatable key-field="id"
+                                                                        data={configLst}
+                                                                        columns={configColumns}
+                                                                        hide-checkbox-column=”true”
+                                                                        onrowaction={handleConfigRow}
+                                                                        sorted-by={sortBy}
+                                                                        sorted-direction={sortDirection}
+                                                                        onsort={doSorting}
+                                                                        class="slds-border_bottom">
+                                                    </lightning-datatable>
+                                                    
+                                            </div>
+                                        
+
+                                </template>
+                    
+                    
+                    </div>
+                    <!-- Modal/Popup Box LWC footer starts here -->
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" onclick={closeModal} title="Close">Close</button>
+                        <!-- <button class="slds-button slds-button_brand" onclick={submitDetails} title="OK">OK</button> -->
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </template>
+    
+    <template if:true={showCustomerDetail}>
+        <c-customer-detail-view customerrecid={customerId} onshowcuslistview={showListView} ></c-customer-detail-view>
+    </template>
+</template>

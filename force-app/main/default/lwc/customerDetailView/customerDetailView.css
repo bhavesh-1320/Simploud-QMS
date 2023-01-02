@@ -1,0 +1,12 @@
+.blocks {
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border: 2px;
+    border-color: black;
+    display: flex;
+    justify-content: center;
+    align-content:center;
+    border-style: solid;
+    background-color: #F6DD81;
+}
